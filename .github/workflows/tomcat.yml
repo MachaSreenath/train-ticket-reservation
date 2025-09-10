@@ -10,7 +10,7 @@ jobs:
        steps:
            # checkout repo
            - name: checkout code
-             uses: actions/checkout@v1
+             uses: actions/checkout@v4
          
            # set-up java
            - name: set-up jdk
