@@ -20,15 +20,6 @@ jobs:
                java-version: '17'
            
            # build with maven(update)
-           - name: validate with maven
-             run: mvn validate
-              
-           - name: plan with maven
-             run: mvn plan
-          
-           - name: test with maven
-             run: mvn test
-
            - name: package with maven
              run: mvn clean package
 
