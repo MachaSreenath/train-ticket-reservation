@@ -39,7 +39,7 @@ jobs:
              run: |
                  curl --fail --anyauth -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}" \
                  "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/list"
-          # Deploy to Tomcat
+          # Deploy to tomcat
            - name: deploy war to tomcat
              run: | 
                 curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
