@@ -22,8 +22,8 @@ jobs:
            - name: validate with maven
              run: mvn validate
               
-           - name: plan with maven
-             run: mvn plan
+           - name: compile with maven
+             run: mvn compile
           
            - name: test with maven
              run: mvn test
