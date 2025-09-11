@@ -34,6 +34,11 @@ jobs:
   
            - name: verify WAR file
              run: ls -lh target/
+             
+           - name: check tomcat connection
+             run: |
+                 curl --fail --anyauth -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}" \
+                 "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/list"
 
           # Deploy to Tomcat
            - name: deploy war to tomcat
