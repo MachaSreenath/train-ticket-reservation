@@ -35,19 +35,20 @@ jobs:
            - name: verify WAR file
              run: ls -lh target/
              
-           - name: check tomcat connection
-             run: |
-                 curl --fail --anyauth -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}" \
-                 "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/list"
+           - name: SonarQube Scan
+             uses: SonarSource/sonarqube-scan-action@v2
+             with:
+              projectBaseDir: .
+              args: >
+               -Dsonar.projectKey=my_project
+               -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+               -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-          # Deploy to Tomcat
-           - name: deploy war to tomcat
-             run: | 
-                curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
-                  -T target/TrainBook-1.0.0-SNAPSHOT.war \
-                  "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
-        
-
+          # (Optional) SonarQube Quality Gate
+           - name: SonarQube Quality Gate Check
+             uses: SonarSource/sonarqube-quality-gate-action@v1
+             with:
+              sonarToken: ${{ secrets.SONAR_TOKEN }}
       
           
        
