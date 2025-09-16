@@ -35,12 +35,13 @@ jobs:
            - name: verify WAR file
              run: ls -lh target/
              
-           # Build + SonarQube (better approach for Maven project)
            - name: Build, Test and SonarQube Scan
-             run: mvn clean verify sonar:sonar \
+             run: |
+              mvn clean verify sonar:sonar \
                -Dsonar.projectKey=train-ticket-reservation \
                -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
                -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+
 
 
 
