@@ -32,10 +32,10 @@ jobs:
       
       - name: Build, Test and SonarQube Scan
         run: |
-          mvn clean verify sonar:sonar \
-            -Dsonar.projectKey=train-ticket-reservation \
-            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+          mvn clean verify sonar:sonar \ #Cleans the project, runs tests, and performs SonarQube analysis
+            -Dsonar.projectKey=train-ticket-reservation \ #Sets the unique key for your project in SonarQube.
+            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \ #URL of your SonarQube server, stored securely as a secret.
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}" #Authentication token for SonarQube, stored as a secret.
 
       - name: check tomcat connection
         run: |
