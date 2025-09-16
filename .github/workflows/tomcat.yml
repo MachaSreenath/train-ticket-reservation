@@ -1,45 +1,41 @@
 name: ci/cd pipeline to deploy to tomcat
-
 on: 
   push:
-    branches: master  #runs pipeline only when pushing to master branch
+    branches: master
 jobs:
-   build-deploy:
-     runs-on: ubuntu-latest
-     
-     steps:
-           # checkout repo
-           - name: checkout code
-             uses: actions/checkout@v3
-         
-           # set-up java
-           - name: set-up jdk
-             uses: actions/setup-java@v3
-             with:
-               distribution: 'temurin'
-               java-version: '11'
-          
-           - name: validate with maven
-             run: mvn validate
-              
-           - name: compile with maven
-             run: mvn compile
-          
-           - name: test with maven
-             run: mvn test
-             
-           # build with maven(update)
-           - name: package with maven
-             run: mvn clean package
-  
-           - name: verify WAR file
-             run: ls -lh target/
-           -  name: Build, Test and SonarQube Scan
-              run: |
-                mvn clean verify sonar:sonar \
-                -Dsonar.projectKey=train-ticket-reservation \
-                -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
-                -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+      
+      - name: set-up jdk
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'   # Updated Java version
+      
+      - name: validate with maven
+        run: mvn validate
+
+      - name: compile with maven
+        run: mvn compile
+      
+      - name: test with maven
+        run: mvn test
+      
+      - name: package with maven
+        run: mvn clean package
+
+      - name: verify WAR file
+        run: ls -lh target/
+      
+      - name: Build, Test and SonarQube Scan
+        run: |
+          mvn clean verify sonar:sonar \
+            -Dsonar.projectKey=train-ticket-reservation \
+            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
 
                
 
