@@ -41,6 +41,7 @@ jobs:
                -Dsonar.projectKey=train-ticket-reservation \
                -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
                -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+               
 
 
 
