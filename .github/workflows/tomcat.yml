@@ -40,12 +40,14 @@ jobs:
         env:
            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
 
-      - name: Snyk Monitor
+      - name: Run Snyk Monitor
         uses: snyk/actions/maven@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: monitor
           args: --file=pom.xml
+        env:
+            JAVA_HOME: /opt/java/openjdk
+            SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
 
      
