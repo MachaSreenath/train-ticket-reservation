@@ -35,17 +35,13 @@ jobs:
         uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.16-8/x64
         with:
-         command: test
-         args: >
-            --file=pom.xml
+          command: test
+          args: >
             --package-manager=maven
             --severity-threshold=high
             --json-file-output=snyk-report.json
             --all-projects
-
-
 
 
 
