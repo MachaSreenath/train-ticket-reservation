@@ -48,12 +48,7 @@ jobs:
             --json-file-output=snyk-report.json
             --all-projects
 
-      # 7. Upload Snyk Report (artifact for review)
-      - name: Upload Snyk Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: snyk-report
-          path: snyk-report.json
+    
 
 
 
