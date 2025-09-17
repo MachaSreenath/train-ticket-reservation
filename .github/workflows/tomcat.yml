@@ -30,25 +30,15 @@ jobs:
       - name: verify WAR file
         run: ls -lh target/
       
-      - name: Build, Test and SonarQube Scan
-        run: |
-          mvn clean verify sonar:sonar \ #Cleans the project, runs tests, and performs SonarQube analysis
-            -Dsonar.projectKey=train-ticket-reservation \ #Sets the unique key for your project in SonarQube.
-            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \ #URL of your SonarQube server, stored securely as a secret.
-            -Dsonar.login="${{ secrets.SONAR_TOKEN }}" #Authentication token for SonarQube, stored as a secret.
-
-      - name: check tomcat connection
-        run: |
-                 curl --fail --anyauth -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}" \
-                 "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/list"
-
-          # Deploy to Tomcat
-      - name: deploy war to tomcat
-        run: | 
-                curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
-                  -T target/TrainBook-1.0.0-SNAPSHOT.war \
-                  "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
-        
+      - name: Run Snyk Test
+        uses: snyk/actions/maven@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: >
+            --file=pom.xml
+            --severity-threshold=high
 
 
 
