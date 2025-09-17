@@ -38,11 +38,9 @@ jobs:
         with:
           command: test
           args: >
-            --package-manager=maven
+            --all-projects
             --severity-threshold=high
             --json-file-output=snyk-report.json
-            --all-projects
-
 
 
       
