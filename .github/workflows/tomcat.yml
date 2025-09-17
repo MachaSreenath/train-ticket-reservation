@@ -36,18 +36,24 @@ jobs:
       - name: Build with Maven
         run: mvn -B package --file pom.xml
 
-      # Run Snyk test (Maven project scan)
       - name: Run Snyk Test
         uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: >
+            --file=pom.xml
+            --severity-threshold=high
+            --json-file-output=snyk-report.json
+            --all-projects
 
-      # (Optional) Upload build artifact
-      - name: Upload JAR Artifact
+      # 7. Upload Snyk Report (artifact for review)
+      - name: Upload Snyk Report
         uses: actions/upload-artifact@v3
         with:
-          name: app-jar
-          path: target/*.jar
+          name: snyk-report
+          path: snyk-report.json
 
 
 
