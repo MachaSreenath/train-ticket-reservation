@@ -1,58 +1,50 @@
-name: build-deploy
 
-on:
+name: ci/cd pipeline to deploy to tomcat
+on: 
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+    branches: master
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout repo
-      - name: Checkout repository
+      - name: checkout code
         uses: actions/checkout@v3
-
-      # Setup Java (sets JAVA_HOME automatically)
-      - name: Set up JDK 17
+      
+      - name: set-up jdk
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
-          distribution: 'temurin'   # Options: temurin, zulu, adopt
-          cache: maven
+          distribution: 'temurin'
+          java-version: '17'   # Updated Java version
+      
+      - name: validate with maven
+        run: mvn validate
 
-      # Cache Maven dependencies for faster builds
-      - name: Cache Maven packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
+      - name: compile with maven
+        run: mvn compile
+      
+      - name: test with maven
+        run: mvn test
+      
+      - name: package with maven
+        run: mvn clean package
 
-      # Build with Maven
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
-
+      - name: verify WAR file
+        run: ls -lh target/
+      
       - name: Run Snyk Test
         uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          JAVA_HOME: /opt/hostedtoolcache/Java_Temurin-Hotspot_jdk/17.0.16-8/x64
         with:
-          command: test
-          args: >
+         command: test
+         args: >
             --file=pom.xml
+            --package-manager=maven
             --severity-threshold=high
             --json-file-output=snyk-report.json
             --all-projects
 
-    
-
-
-
-               
 
 
 
