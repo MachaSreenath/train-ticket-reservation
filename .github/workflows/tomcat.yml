@@ -1,50 +1,43 @@
+name: CI/CD Pipeline to Deploy Tomcat
 
-name: ci/cd pipeline to deploy to tomcat
-on: 
+on:
   push:
-    branches: master
+    branches:
+      - master
+
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: checkout code
+      - name: Checkout Code
         uses: actions/checkout@v3
-      
-      - name: set-up jdk
+
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'   # Updated Java version
-      
-      - name: validate with maven
-        run: mvn validate
+          java-version: '17'
 
-      - name: compile with maven
-        run: mvn compile
-      
-      - name: test with maven
-        run: mvn test
-      
-      - name: package with maven
-        run: mvn clean package
+      - name: Check Java & Maven Version
+        run: |
+          echo "JAVA_HOME=$JAVA_HOME"
+          java -version
+          mvn -version
 
-      - name: verify WAR file
+      - name: Build with Maven
+        run: |
+          mvn clean package
+
+      - name: Verify WAR file
         run: ls -lh target/
-      
+
+      - name: Set up Snyk CLI
+        uses: snyk/actions/setup@master
+
       - name: Run Snyk Test
-        uses: snyk/actions/maven@master
+        run: snyk test --all-projects --severity-threshold=high --json-file-output=snyk-report.json
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          command: test
-          args: >
-            --all-projects
-            --severity-threshold=high
-            --json-file-output=snyk-report.json
 
-
-      
-          
-       
      
-      
