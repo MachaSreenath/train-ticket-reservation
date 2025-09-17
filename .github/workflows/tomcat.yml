@@ -1,44 +1,53 @@
-name: ci/cd pipeline to deploy to tomcat
-on: 
+name: build-deploy
+
+on:
   push:
-    branches: master
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
+
     steps:
-      - name: checkout code
+      # Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v3
-      
-      - name: set-up jdk
+
+      # Setup Java (sets JAVA_HOME automatically)
+      - name: Set up JDK 17
         uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '17'   # Updated Java version
-      
-      - name: validate with maven
-        run: mvn validate
+          java-version: '17'
+          distribution: 'temurin'   # Options: temurin, zulu, adopt
+          cache: maven
 
-      - name: compile with maven
-        run: mvn compile
-      
-      - name: test with maven
-        run: mvn test
-      
-      - name: package with maven
-        run: mvn clean package
+      # Cache Maven dependencies for faster builds
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
 
-      - name: verify WAR file
-        run: ls -lh target/
-      
+      # Build with Maven
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
+
+      # Run Snyk test (Maven project scan)
       - name: Run Snyk Test
         uses: snyk/actions/maven@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      # (Optional) Upload build artifact
+      - name: Upload JAR Artifact
+        uses: actions/upload-artifact@v3
         with:
-          command: test
-          args: >
-            --file=pom.xml
-            --severity-threshold=high
+          name: app-jar
+          path: target/*.jar
 
 
 
