@@ -1,0 +1,51 @@
+name: Build a WAR file using Maven and Deploy Java App to Tomcat running in AWS EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Maven
+        run: mvn clean package
+
+      # Deploy WAR to Tomcat - DEV Environment
+      - name: Deploy to Tomcat (ENV 1)
+        run: |
+          curl -v -u ${{ secrets.TOMCAT_USER1 }}:${{ secrets.TOMCAT_PASSWORD1 }} \
+          -T target/TrainBook-1.0.0-SNAPSHOT.war \
+          "http://${{ secrets.TOMCAT_HOST1 }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+
+      # Deploy WAR to Tomcat - TEST Environment
+      - name: Deploy to Tomcat (ENV 2)
+        run: |
+          curl -v -u ${{ secrets.TOMCAT_USER2 }}:${{ secrets.TOMCAT_PASSWORD2 }} \
+          -T target/TrainBook-1.0.0-SNAPSHOT.war \
+          "http://${{ secrets.TOMCAT_HOST2 }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+
+      # Deploy WAR to Tomcat - PREPROD Environment
+      - name: Deploy to Tomcat (ENV 3)
+        run: |
+          curl -v -u ${{ secrets.TOMCAT_USER3 }}:${{ secrets.TOMCAT_PASSWORD3 }} \
+          -T target/TrainBook-1.0.0-SNAPSHOT.war \
+          "http://${{ secrets.TOMCAT_HOST3 }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+
+      # Deploy WAR to Tomcat - PROD Environment
+      - name: Deploy to Tomcat (ENV 4)
+        run: |
+          curl -v -u ${{ secrets.TOMCAT_USER4 }}:${{ secrets.TOMCAT_PASSWORD4 }} \
+          -T target/TrainBook-1.0.0-SNAPSHOT.war \
+          "http://${{ secrets.TOMCAT_HOST4 }}:8080/manager/text/deploy?path=/TrainBook&update=true"
