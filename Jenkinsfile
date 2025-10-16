@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     environment {
-        SERVER = 'ubuntu@ec2-13-222-133-81.compute-1.amazonaws.com'
+        SERVER = 'ubuntu@ec2-54-209-242-126.compute-1.amazonaws.com'
+        DEPLOY_PATH = '/home/ubuntu/app'
     }
 
     stages {
@@ -35,15 +36,23 @@ pipeline {
 
         stage('Deploy to Server') {
             steps {
-                sshagent(['ssh-key']) {
-                    sh '''
+                sshagent(['jenkins-ssh-key']) {
+                    sh """
                         echo "Stopping old app..."
-                        ssh -o StrictHostKeyChecking=no ${SERVER} "pkill -f '.jar' || true"
-                        echo "Copying new app..."
-                        scp -o StrictHostKeyChecking=no target/*.jar ${SERVER}:/home/ubuntu/
-                        echo "Starting app..."
-                        ssh -o StrictHostKeyChecking=no ${SERVER} "nohup java -jar /home/ubunut/*.jar > app.log 2>&1 &"
-                    '''
+                        ssh -o StrictHostKeyChecking=no ${SERVER} 'pm2 delete app || true'
+                        
+                        echo "Creating deploy directory if not exists..."
+                        ssh -o StrictHostKeyChecking=no ${SERVER} 'mkdir -p ${DEPLOY_PATH}'
+                        
+                        echo "Copying new app files..."
+                        scp -o StrictHostKeyChecking=no -r * ${SERVER}:${DEPLOY_PATH}/
+                        
+                        echo "Installing Node.js dependencies..."
+                        ssh -o StrictHostKeyChecking=no ${SERVER} 'cd ${DEPLOY_PATH} && npm install'
+                        
+                        echo "Starting app using pm2..."
+                        ssh -o StrictHostKeyChecking=no ${SERVER} 'cd ${DEPLOY_PATH} && pm2 start index.js --name app'
+                    """
                 }
             }
         }
