@@ -10,7 +10,7 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        git branch: 'main', url: 'git@github.com:MachaSreenath/train-ticket-reservation.git', credentialsId: 'github-ssh'
+        git branch: 'master', url: 'git@github.com:MachaSreenath/train-ticket-reservation.git', credentialsId: 'github-ssh'
       }
     }
 
