@@ -1,69 +1,48 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        SERVER = 'ubuntu@ec2-54-209-242-126.compute-1.amazonaws.com'
-        DEPLOY_PATH = '/home/ubuntu/app'
+  environment {
+    APP_NAME = 'train-ticket'           
+    TOMCAT_HOST = '54.242.124.202'   
+    TOMCAT_PORT = '8081'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: 'main', url: 'git@github.com:MachaSreenath/train-ticket-reservation.git', credentialsId: 'github-ssh'
+      }
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'master', url: 'https://github.com/MachaSreenath/train-ticket-reservation.git'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'mvn clean package'
-            }
-        }
-
-        stage('Approval Before Deploy') {
-            steps {
-                script {
-                    def userInput = input(
-                        id: 'DeployApproval', 
-                        message: 'Do you want to deploy this build to the server?',
-                        parameters: [choice(name: 'Approve', choices: 'No\nYes', description: 'Approve deployment')]
-                    )
-                    if (userInput == 'No') {
-                        error("Deployment aborted by user")
-                    }
-                }
-            }
-        }
-
-        stage('Deploy to Server') {
-            steps {
-                sshagent(['jenkins-ssh-key']) {
-                    sh """
-                        echo "Stopping old app..."
-                        ssh -o StrictHostKeyChecking=no ${SERVER} 'pm2 delete app || true'
-                        
-                        echo "Creating deploy directory if not exists..."
-                        ssh -o StrictHostKeyChecking=no ${SERVER} 'mkdir -p ${DEPLOY_PATH}'
-                        
-                        echo "Copying new app files..."
-                        scp -o StrictHostKeyChecking=no -r * ${SERVER}:${DEPLOY_PATH}/
-                        
-                        echo "Installing Node.js dependencies..."
-                        ssh -o StrictHostKeyChecking=no ${SERVER} 'cd ${DEPLOY_PATH} && npm install'
-                        
-                        echo "Starting app using pm2..."
-                        ssh -o StrictHostKeyChecking=no ${SERVER} 'cd ${DEPLOY_PATH} && pm2 start index.js --name app'
-                    """
-                }
-            }
-        }
+    stage('Build') {
+      steps {
+        sh 'mvn clean package -DskipTests'
+      }
     }
 
-    post {
-        success {
-            echo 'Deployment Successful!'
+    stage('Deploy to Tomcat') {
+      steps {
+        withCredentials([usernamePassword(credentialsId: 'tomcat-deployer', usernameVariable: 'TOMCAT_USER', passwordVariable: 'TOMCAT_PASS')]) {
+          script {
+            def warFile = sh(script: "ls target/*.war | head -n 1", returnStdout: true).trim()
+            echo "Deploying ${warFile} to http://${TOMCAT_HOST}:${TOMCAT_PORT}/manager/text/deploy?path=/${APP_NAME}&update=true"
+            sh """
+              curl --fail --silent --show-error --upload-file ${warFile} \\
+                   "http://${TOMCAT_HOST}:${TOMCAT_PORT}/manager/text/deploy?path=/${APP_NAME}&update=true" \\
+                   --user "${TOMCAT_USER}:${TOMCAT_PASS}"
+            """
+          }
         }
-        failure {
-            echo 'Deployment Failed or Aborted'
-        }
+      }
     }
+  }
+
+  post {
+    success {
+      echo '✅ Deployment successful!'
+    }
+    failure {
+      echo '❌ Deployment failed!'
+    }
+  }
 }
