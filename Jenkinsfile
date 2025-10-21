@@ -1,48 +1,52 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    APP_NAME = 'train-ticket'           
-    TOMCAT_HOST = '54.242.124.202'   
-    TOMCAT_PORT = '8081'
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        git branch: 'master', url: 'git@github.com:MachaSreenath/train-ticket-reservation.git', credentialsId: 'github-ssh'
-      }
+    environment {
+        APP_NAME = 'train-ticket'
     }
 
-    stage('Build') {
-      steps {
-        sh 'mvn clean package -DskipTests'
-      }
-    }
-
-    stage('Deploy to Tomcat') {
-      steps {
-        withCredentials([usernamePassword(credentialsId: 'tomcat-deployer', usernameVariable: 'TOMCAT_USER', passwordVariable: 'TOMCAT_PASS')]) {
-          script {
-            def warFile = sh(script: "ls target/*.war | head -n 1", returnStdout: true).trim()
-            echo "Deploying ${warFile} to http://${TOMCAT_HOST}:${TOMCAT_PORT}/manager/text/deploy?path=/${APP_NAME}&update=true"
-            sh """
-              curl --fail --silent --show-error --upload-file ${warFile} \\
-                   "http://${TOMCAT_HOST}:${TOMCAT_PORT}/manager/text/deploy?path=/${APP_NAME}&update=true" \\
-                   --user "${TOMCAT_USER}:${TOMCAT_PASS}"
-            """
-          }
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/MachaSreenath/train-ticket-reservation.git'
+            }
         }
-      }
-    }
-  }
 
-  post {
-    success {
-      echo '✅ Deployment successful!'
+        stage('Build with Maven') {
+            steps {
+                echo 'Building project using Maven...'
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Deploy to Tomcat') {
+            steps {
+                echo '🚀 Deploying WAR to Tomcat...'
+                withCredentials([
+                    string(credentialsId: 'tomcat-user', variable: 'TOMCAT_USER'),
+                    string(credentialsId: 'tomcat-pass', variable: 'TOMCAT_PASS'),
+                    string(credentialsId: 'tomcat-host', variable: 'TOMCAT_HOST')
+                ]) {
+                    script {
+                        def warFile = sh(script: "ls target/*.war | head -n 1", returnStdout: true).trim()
+                        echo "Deploying ${warFile}..."
+                        sh """
+                        curl -u $TOMCAT_USER:$TOMCAT_PASS \\
+                            --upload-file ${warFile} \\
+                            "$TOMCAT_HOST/manager/text/deploy?path=/${APP_NAME}&update=true"
+                        """
+                    }
+                }
+            }
+        }
     }
-    failure {
-      echo '❌ Deployment failed!'
+
+    post {
+        success {
+            echo '✅ Deployment completed successfully!'
+        }
+        failure {
+            echo '❌ Deployment failed. Check Jenkins logs.'
+        }
     }
-  }
 }
