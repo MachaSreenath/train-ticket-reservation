@@ -38,6 +38,6 @@ jobs:
           </settings>
           EOF
 
-      # 4. Build and deploy
+      # 4. Build deploy
       - name: Build and deploy
         run: mvn clean deploy --settings $HOME/.m2/settings.xml
