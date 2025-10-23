@@ -22,7 +22,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      # 3. Create settings.xml with Nexus credentials from secrets
+      # 3. Create settings.xml with Nexus credentials from secret repo
       - name: Setup Maven settings.xml
         run: |
           mkdir -p $HOME/.m2
