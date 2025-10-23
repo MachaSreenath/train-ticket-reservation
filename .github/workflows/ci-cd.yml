@@ -2,7 +2,7 @@ name: CI-CD Pipeline
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   build:
@@ -28,5 +28,5 @@ jobs:
         mvn clean verify sonar:sonar \
           -Dsonar.projectKey=train-ticket \
           -Dsonar.projectName='train-ticket' \
-          -Dsonar.host.url=http://3.239.88.150:9000 \
-          -Dsonar.token=$SONAR_TOKEN
+          -Dsonar.host.url=http://13.57.220.164:9000 \
+          -Dsonar.token=sqp_fbb43919e02bc7934a69fdc9bccfa766044b0a76
