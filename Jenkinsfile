@@ -43,10 +43,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Deployment completed successfully!'
+            echo 'Deployment completed successfully!'
         }
         failure {
-            echo '❌ Deployment failed. Check Jenkins logs.'
+            echo 'Deployment failed. Check Jenkins logs.'
         }
     }
 }
