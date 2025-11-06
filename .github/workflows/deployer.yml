@@ -1,0 +1,74 @@
+name: ci/cd pipeline to deploy to tomcat
+on: 
+  push:
+    branches: master
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+      
+      - name: set-up jdk
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'   # Updated Java version
+      
+      - name: validate with maven
+        run: mvn validate
+
+      - name: compile with maven
+        run: mvn compile
+      
+      - name: test with maven
+        run: mvn test
+      
+      - name: package with maven
+        run: mvn clean package
+
+      - name: verify WAR file
+        run: ls -lh target/
+      
+      - name: Build, Test and SonarQube Scan
+        run: |
+          mvn clean verify sonar:sonar \ #Cleans the project, runs tests, and performs SonarQube analysis
+            -Dsonar.projectKey=train-ticket-reservation \ #Sets the unique key for your project in SonarQube.
+            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \ #URL of your SonarQube server, stored securely as a secret.
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}" #Authentication token for SonarQube, stored as a secret.
+
+      - name: check tomcat connection
+        run: |
+                 curl --fail --anyauth -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}" \
+                 "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/list"
+                 
+      - name: Detect version type
+        id: version_check
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Project version: $VERSION"
+          if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
+            echo "repo_url=${{ secrets.NEXUS_SNAPSHOTS_URL }}" >> $GITHUB_ENV
+          else
+            echo "repo_url=${{ secrets.NEXUS_RELEASES_URL }}" >> $GITHUB_ENV
+          fi
+
+      - name: Deploy to Nexus
+        env:
+          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          NEXUS_URL: ${{ env.repo_url }}
+        run: |
+          echo "Deploying to $NEXUS_URL"
+          mvn deploy \
+            -DaltDeploymentRepository=nexus::default::${NEXUS_URL} \
+            -Dnexus.username=${NEXUS_USERNAME} \
+            -Dnexus.password=${NEXUS_PASSWORD}
+          
+          # Deploy to Tomcat
+      - name: deploy war to tomcat
+        run: | 
+                curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
+                  -T target/TrainBook-1.0.0-SNAPSHOT.war \
+                  "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
+        
