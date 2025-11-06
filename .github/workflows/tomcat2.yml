@@ -32,7 +32,7 @@ jobs:
       - name: SonarQube Analysis
         run: |
           mvn sonar:sonar \
-            -Dsonar.projectKey=my-java-webapp \
+            -Dsonar.projectKey=train-ticket \
             -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
