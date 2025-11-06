@@ -28,11 +28,21 @@
         </snapshotRepository>
     </distributionManagement>
 
-    <!-- Get dependencies from Nexus (optional) -->
+    <!-- Get dependencies from Nexus -->
     <repositories>
         <repository>
-            <id>central</id>
-            <url>https://repo.maven.apache.org/maven2</url>
+            <id>nexus-releases</id>
+            <url>http://3.92.191.10:8081/repository/maven-releases/</url>
+        </repository>
+        <repository>
+            <id>nexus-snapshots</id>
+            <url>http://3.92.191.10:8081/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
@@ -43,7 +53,7 @@
     </properties>
 
     <dependencies>
-        <!-- Servlet API (for web apps) -->
+        <!-- Servlet API (provided by Tomcat) -->
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
@@ -67,7 +77,7 @@
     </dependencies>
 
     <build>
-        <finalName>train-ticket-reservation</finalName>
+        <finalName>train-ticket</finalName>
         <plugins>
             <!-- Compiler plugin -->
             <plugin>
@@ -94,7 +104,7 @@
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.9.1.2184</version>
+                <version>4.0.0.4121</version>
             </plugin>
         </plugins>
     </build>
