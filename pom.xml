@@ -17,32 +17,22 @@
     <!-- Upload builds to Nexus -->
     <distributionManagement>
         <repository>
-            <id>nexus</id>
+            <id>nexus</id> <!-- Must match server ID in settings.xml / GitHub Secrets -->
             <name>maven-releases</name>
             <url>http://3.92.191.10:8081/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>nexus-snapshots</id>
+            <id>nexus-snapshots</id> <!-- Must match server ID for snapshots -->
             <name>maven-snapshots</name>
             <url>http://3.92.191.10:8081/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
-    <!-- Get dependencies from Nexus -->
+    <!-- Get dependencies from Maven Central -->
     <repositories>
         <repository>
-            <id>nexus-releases</id>
-            <url>http://3.92.191.10:8081/repository/maven-releases/</url>
-        </repository>
-        <repository>
-            <id>nexus-snapshots</id>
-            <url>http://3.92.191.10:8081/repository/maven-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
+            <id>central</id>
+            <url>https://repo.maven.apache.org/maven2</url>
         </repository>
     </repositories>
 
@@ -50,6 +40,7 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <finalName>train-ticket</finalName>
     </properties>
 
     <dependencies>
@@ -77,7 +68,6 @@
     </dependencies>
 
     <build>
-        <finalName>train-ticket</finalName>
         <plugins>
             <!-- Compiler plugin -->
             <plugin>
@@ -100,7 +90,7 @@
                 </configuration>
             </plugin>
 
-            <!-- SonarQube plugin-->
+            <!-- SonarQube plugin -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
