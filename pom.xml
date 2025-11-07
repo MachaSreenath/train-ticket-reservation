@@ -7,48 +7,30 @@
   <groupId>com.example</groupId>
   <artifactId>train-ticket</artifactId>
   <version>1.0.0</version>
-  <packaging>war</packaging> <!-- Changed from jar to war -->
+  <packaging>war</packaging> <!-- WAR packaging for Tomcat -->
 
   <name>train-ticket</name>
-  <description>Java web app for Nexus, SonarQube, and Tomcat deployment</description>
-
-  <!-- ✅ Single distributionManagement block containing both repos -->
-  <distributionManagement>
-    <!-- Release repository -->
-    <repository>
-      <id>nexus-releases</id>
-      <name>Nexus Release Repository</name>
-      <url>${nexus.url}/repository/maven-releases/</url>
-    </repository>
-
-    <!-- Snapshot repository -->
-    <snapshotRepository>
-      <id>nexus-snapshots</id>
-      <name>Nexus Snapshot Repository</name>
-      <url>${nexus.url}/repository/maven-snapshots/</url>
-    </snapshotRepository>
-  </distributionManagement>
+  <description>Java web app for deployment to Tomcat</description>
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <nexus.url>${env.NEXUS_URL}</nexus.url>
   </properties>
 
   <dependencies>
-    <!-- Example dependency -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-lang3</artifactId>
-      <version>3.12.0</version>
-    </dependency>
-
     <!-- Servlet API for web applications -->
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>javax.servlet-api</artifactId>
       <version>4.0.1</version>
       <scope>provided</scope>
+    </dependency>
+
+    <!-- Example dependency -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version>
     </dependency>
   </dependencies>
 
@@ -65,14 +47,7 @@
         </configuration>
       </plugin>
 
-      <!-- ✅ SonarQube plugin -->
-      <plugin>
-        <groupId>org.sonarsource.scanner.maven</groupId>
-        <artifactId>sonar-maven-plugin</artifactId>
-        <version>3.10.0.3600</version>
-      </plugin>
-
-      <!-- ✅ Optional: Maven WAR plugin (ensures proper WAR packaging) -->
+      <!-- Maven WAR plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-war-plugin</artifactId>
