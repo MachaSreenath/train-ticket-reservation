@@ -3,7 +3,7 @@ name: Deploy train-ticket app to Tomcat
 on:
   push:
     branches:
-      - master
+      - master  
 
 jobs:
   build:
@@ -19,8 +19,25 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Build WAR file with Maven
-        run: mvn clean package -DskipTests
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4
+        with:
+          maven-version: '3.9.6'
+
+      - name: Verify Maven Installation
+        run: mvn -v
+
+      - name: Validate project
+        run: mvn validate
+
+      - name: Compile source code
+        run: mvn compile
+
+      - name: Run unit tests
+        run: mvn test
+
+      - name: Package application (WAR)
+        run: mvn package -DskipTests
 
       - name: Deploy WAR to Tomcat
         run: |
