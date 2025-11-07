@@ -74,5 +74,5 @@ jobs:
           cp target/*.war target/amazon-app.war
           echo "Deploying WAR to Tomcat at $TOMCAT_HOST_URL"
           curl -u $TOMCAT_USER:$TOMCAT_PASS \
-               -T target/amazon-app.war \
+               -T target/train-ticket.war \
                "$TOMCAT_HOST_URL/manager/text/deploy?path=/amazon-app&update=true"
