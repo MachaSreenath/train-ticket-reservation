@@ -5,11 +5,11 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
-  <artifactId>amazon-app</artifactId>
+  <artifactId>train-ticket</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>war</packaging> <!-- Changed from jar to war -->
 
-  <name>AmazonApp</name>
+  <name>train-ticket</name>
   <description>Java web app for Nexus, SonarQube, and Tomcat deployment</description>
 
   <!-- ✅ Single distributionManagement block containing both repos -->
