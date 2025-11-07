@@ -1,4 +1,4 @@
-name: Build and Deploy to Nexus
+name: Build, SonarQube Analysis, and Deploy to Nexus
 
 on:
   push:
@@ -28,6 +28,18 @@ jobs:
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
+      # ------------------- SonarQube Analysis -------------------
+      - name: SonarQube Scan
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: |
+          mvn sonar:sonar \
+            -Dsonar.projectKey=train-ticket \
+            -Dsonar.host.url=${SONAR_HOST_URL} \
+            -Dsonar.login=${SONAR_TOKEN}
+
+      # ------------------- Determine Nexus repo -------------------
       - name: Detect version type
         id: version_check
         run: |
@@ -37,7 +49,6 @@ jobs:
             echo "repo_url=${{ secrets.NEXUS_SNAPSHOTS_URL }}" >> $GITHUB_ENV
           else
             echo "repo_url=${{ secrets.NEXUS_RELEASE_URL }}" >> $GITHUB_ENV
-          fi
 
       - name: Deploy to Nexus
         env:
