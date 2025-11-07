@@ -1,31 +1,69 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
-         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
   <artifactId>amazon-app</artifactId>
-  <version>1.0.0</version> <!-- Use -SNAPSHOT for dev builds -->
+  <version>1.0-SNAPSHOT</version> <!-- Use -SNAPSHOT for dev builds -->
   <packaging>jar</packaging>
+
+  <name>AmazonApp</name>
+  <description>Java app for Nexus deployment and SonarQube analysis</description>
 
   <!-- ✅ Single distributionManagement block containing both repos -->
   <distributionManagement>
+    <!-- Release repository -->
     <repository>
       <id>nexus-releases</id>
       <name>Nexus Release Repository</name>
-      <url>http://52.91.140.134:8081/repository/maven-releases/</url>
+      <url>${nexus.url}/repository/maven-releases/</url>
     </repository>
+
+    <!-- Snapshot repository -->
     <snapshotRepository>
       <id>nexus-snapshots</id>
       <name>Nexus Snapshot Repository</name>
-      <url>http://52.91.140.134:8081/repository/maven-snapshots/</url>
+      <url>${nexus.url}/repository/maven-snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
+    <nexus.url>${env.NEXUS_URL}</nexus.url> <!-- passed from GitHub Actions -->
   </properties>
+
+  <dependencies>
+    <!-- Example dependency -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Compiler plugin -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.11.0</version>
+        <configuration>
+          <source>${maven.compiler.source}</source>
+          <target>${maven.compiler.target}</target>
+        </configuration>
+      </plugin>
+
+      <!-- ✅ SonarQube plugin -->
+      <plugin>
+        <groupId>org.sonarsource.scanner.maven</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>3.10.0.3600</version>
+      </plugin>
+    </plugins>
+  </build>
 
 </project>
