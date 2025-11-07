@@ -1,4 +1,4 @@
-name: Build, SonarQube Analysis, and Deploy to Nexus
+name: Build and Deploy to Tomcat
 
 on:
   push:
@@ -10,60 +10,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # 2️⃣ Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-          server-id: nexus
-          server-username: NEXUS_USERNAME
-          server-password: NEXUS_PASSWORD
 
-      - name: Validate Maven project
-        run: mvn validate
-
+      # 3️⃣ Build WAR with Maven
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      # ------------------- SonarQube Analysis -------------------
-      - name: SonarQube Scan
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: |
-          mvn sonar:sonar \
-            -Dsonar.projectKey=train-ticket \
-            -Dsonar.host.url=${SONAR_HOST_URL} \
-            -Dsonar.login=${SONAR_TOKEN}
-
-      # ------------------- Determine Nexus repo -------------------
-      - name: Detect version type
-        id: version_check
-        run: |
-          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
-          echo "Project version: $VERSION"
-          if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
-            echo "repo_url=${{ secrets.NEXUS_SNAPSHOTS_URL }}" >> $GITHUB_ENV
-          else
-            echo "repo_url=${{ secrets.NEXUS_RELEASE_URL }}" >> $GITHUB_ENV
-          fi
-
-      - name: Deploy to Nexus
-        env:
-          NEXUS_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          NEXUS_URL: ${{ env.repo_url }}
-        run: |
-          echo "Deploying to $NEXUS_URL"
-          mvn deploy \
-            -DaltDeploymentRepository=nexus::default::${NEXUS_URL} \
-            -Dnexus.username=${NEXUS_USERNAME} \
-            -Dnexus.password=${NEXUS_PASSWORD}
-
-# ------------------- Deploy to Apache Tomcat -------------------
+      # 4️⃣ Deploy to Apache Tomcat
       - name: Deploy to Tomcat
         env:
           TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
