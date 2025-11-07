@@ -1,40 +1,29 @@
-name: Build and Deploy to Tomcat
+name: Deploy train-ticket app to Tomcat
 
 on:
   push:
     branches:
-      - master
+      - main  # deploys when you push to main branch
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ Checkout code
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Set up JDK 17
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
           java-version: '17'
+          distribution: 'temurin'
 
-      # 3️⃣ Build WAR with Maven
-      - name: Build with Maven
+      - name: Build WAR file with Maven
         run: mvn clean package -DskipTests
 
-      # 4️⃣ Deploy to Apache Tomcat
-      - name: Deploy to Tomcat
-        env:
-          TOMCAT_USER: ${{ secrets.TOMCAT_USER }}
-          TOMCAT_PASS: ${{ secrets.TOMCAT_PASS }}
-          TOMCAT_HOST_URL: ${{ secrets.TOMCAT_HOST }}
+      - name: Deploy WAR to Tomcat
         run: |
-          echo "Preparing WAR for Tomcat deployment..."
-          cp target/*.war target/train-ticket.war
-          echo "Deploying WAR to Tomcat at $TOMCAT_HOST_URL"
-          curl -u $TOMCAT_USER:$TOMCAT_PASS \
-               -T target/train-ticket.war \
-               "$TOMCAT_HOST_URL/manager/text/deploy?path=/train-ticket&update=true"
+          curl -v -u ${{ secrets.TOMCAT_USERNAME }}:${{ secrets.TOMCAT_PASSWORD }} \
+            -T target/train-ticket.war \
+            "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/train-ticket&update=true"
