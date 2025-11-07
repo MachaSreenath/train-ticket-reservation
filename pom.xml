@@ -6,11 +6,11 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
   <artifactId>amazon-app</artifactId>
-  <version>1.0-SNAPSHOT</version> <!-- Use -SNAPSHOT for dev builds -->
-  <packaging>jar</packaging>
+  <version>1.0-SNAPSHOT</version>
+  <packaging>war</packaging> <!-- Changed from jar to war -->
 
   <name>AmazonApp</name>
-  <description>Java app for Nexus deployment and SonarQube analysis</description>
+  <description>Java web app for Nexus, SonarQube, and Tomcat deployment</description>
 
   <!-- ✅ Single distributionManagement block containing both repos -->
   <distributionManagement>
@@ -32,7 +32,7 @@
   <properties>
     <maven.compiler.source>17</maven.compiler.source>
     <maven.compiler.target>17</maven.compiler.target>
-    <nexus.url>${env.NEXUS_URL}</nexus.url> <!-- passed from GitHub Actions -->
+    <nexus.url>${env.NEXUS_URL}</nexus.url>
   </properties>
 
   <dependencies>
@@ -41,6 +41,14 @@
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-lang3</artifactId>
       <version>3.12.0</version>
+    </dependency>
+
+    <!-- Servlet API for web applications -->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>4.0.1</version>
+      <scope>provided</scope>
     </dependency>
   </dependencies>
 
@@ -62,6 +70,16 @@
         <groupId>org.sonarsource.scanner.maven</groupId>
         <artifactId>sonar-maven-plugin</artifactId>
         <version>3.10.0.3600</version>
+      </plugin>
+
+      <!-- ✅ Optional: Maven WAR plugin (ensures proper WAR packaging) -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>3.3.2</version>
+        <configuration>
+          <failOnMissingWebXml>false</failOnMissingWebXml>
+        </configuration>
       </plugin>
     </plugins>
   </build>
