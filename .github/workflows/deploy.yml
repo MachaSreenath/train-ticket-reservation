@@ -1,0 +1,29 @@
+name: Deploy train-ticket app to Tomcat
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build WAR file with Maven
+        run: mvn clean package -DskipTests
+
+      - name: Deploy WAR to Tomcat
+        run: |
+          curl -v -u ${{ secrets.TOMCAT_USERNAME }}:${{ secrets.TOMCAT_PASSWORD }} \
+            -T target/train-ticket.war \
+            "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/train-ticket&update=true"
