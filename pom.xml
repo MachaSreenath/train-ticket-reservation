@@ -6,7 +6,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.example</groupId>
   <artifactId>amazon-app</artifactId>
-  <version>1.0.0-SNAPSHOT</version> <!-- Use -SNAPSHOT for dev builds -->
+  <version>1.0.0</version> <!-- Use -SNAPSHOT for dev builds -->
   <packaging>jar</packaging>
 
   <!-- ✅ Single distributionManagement block containing both repos -->
