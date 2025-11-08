@@ -1,46 +1,85 @@
-name: Deploy train-ticket app to Tomcat
-
-on:
+name: ci/cd pipeline to deploy to tomcat
+on: 
   push:
-    branches:
-      - master  
-
+    branches: master
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+      - name: checkout code
+        uses: actions/checkout@v3
+      
+      - name: set-up jdk
+        uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'temurin'
-
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4
-        with:
-          maven-version: '3.9.6'
-
-      - name: Verify Maven Installation
-        run: mvn -v
-
-      - name: Validate project
+          java-version: '17'   # Updated Java version
+      
+      - name: validate with maven
         run: mvn validate
 
-      - name: Compile source code
+      - name: compile with maven
         run: mvn compile
-
-      - name: Run unit tests
+      
+      - name: test with maven
         run: mvn test
+      
+      - name: package with maven
+        run: mvn clean package
 
-      - name: Package application (WAR)
-        run: mvn package -DskipTests
+      - name: verify WAR file
+        run: ls -lh target/
+        
+      - name: Configure Maven settings
+        run: |
+          mkdir -p $HOME/.m2
+          cat > $HOME/.m2/settings.xml <<EOL
+          <settings>
+            <servers>
+              <server>
+                <id>nexus</id>
+                <username>${{ secrets.NEXUS_USERNAME }}</username>
+                <password>${{ secrets.NEXUS_PASSWORD }}</password>
+              </server>
+            </servers>
+          </settings>
+          EOL
+      
+      - name: Build, Test and SonarQube Scan
+        run: |
+          mvn clean verify sonar:sonar \
+            -Dsonar.projectKey=train-ticket-reservation \
+            -Dsonar.host.url="${{ secrets.SONAR_HOST_URL }}" \
+            -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
+           
+      - name: Detect version type
+        id: version_check
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "Project version: $VERSION"
+          if [[ "$VERSION" == *"-SNAPSHOT" ]]; then
+            echo "repo_url=${{ secrets.NEXUS_SNAPSHOTS_URL }}" >> $GITHUB_ENV
+          else
+            echo "repo_url=${{ secrets.NEXUS_RELEASES_URL }}" >> $GITHUB_ENV
+          fi
 
+      - name: Deploy to Nexus
+        env:
+           NEXUS_URL: ${{ env.repo_url }}
+        run: |
+          echo "Deploying to $NEXUS_URL"
+          mvn deploy -DaltDeploymentRepository=nexus::default::${NEXUS_URL}
+
+      - name: check tomcat connection
+        run: |
+                 curl --fail --anyauth -u "${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }}" \
+                 "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/list"
+          
+          # Deploy to Tomcat
       - name: Deploy WAR to Tomcat
         run: |
-          curl -v -u ${{ secrets.TOMCAT_USERNAME }}:${{ secrets.TOMCAT_PASSWORD }} \
-            -T target/train-ticket.war \
-            "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/train-ticket&update=true"
+          WAR_FILE=$(ls target/*.war)
+          echo "Deploying $WAR_FILE to Tomcat..."
+          curl -v -u ${{ secrets.TOMCAT_USER }}:${{ secrets.TOMCAT_PASSWORD }} \
+           -T "$WAR_FILE" \
+           "http://${{ secrets.TOMCAT_HOST }}:8080/manager/text/deploy?path=/TrainBook&update=true"
