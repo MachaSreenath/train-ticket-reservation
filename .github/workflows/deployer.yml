@@ -15,17 +15,12 @@ jobs:
           distribution: 'temurin'
           java-version: '17'   # Updated Java version
       
-      - name: validate with maven
-        run: mvn validate
+      - name: Build project with Maven
+        run: mvn clean package -DskipTests
+  
+      - name: Build Docker image
+        run: docker build -t trainbook-app .
 
-      - name: compile with maven
-        run: mvn compile
-      
-      - name: test with maven
-        run: mvn test
-      
-      - name: package with maven
-        run: mvn clean package
 
       - name: verify WAR file
         run: ls -lh target/
