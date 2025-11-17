@@ -89,8 +89,5 @@
 	<properties>
         <sonar.host.url>http://52.90.115.44:9000</sonar.host.url>
     </properties>
-	
-		
-</distributionManagement>
 
 </project>
