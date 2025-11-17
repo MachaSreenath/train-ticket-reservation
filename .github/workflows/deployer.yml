@@ -17,13 +17,12 @@ jobs:
       
       - name: Build project with Maven
         run: mvn clean package -DskipTests
+      
+      - name: verify WAR file
+        run: ls -lh target/
   
       - name: Build Docker image
         run: docker build -t trainbook-app .
-
-
-      - name: verify WAR file
-        run: ls -lh target/
         
       - name: Configure AWS
         uses: aws-actions/configure-aws-credentials@v4
