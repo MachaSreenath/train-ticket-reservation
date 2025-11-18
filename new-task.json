@@ -8,8 +8,8 @@
   "taskRoleArn": "arn:aws:iam::474668386320:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
-      "name": "train-ticket",
-      "image": "474668386320.dkr.ecr.us-east-1.amazonaws.com/train-ticket:1763436828",
+      "name": "train-ticket-repo",
+      "image": "474668386320.dkr.ecr.us-east-1.amazonaws.com/train-ticket-repo",
       "essential": true,
       "portMappings": [
         {
