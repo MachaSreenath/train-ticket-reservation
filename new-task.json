@@ -1,15 +1,15 @@
 {
-  "family": "trainbook-task",
+  "family": "train-ticket-family",
   "networkMode": "awsvpc",
   "requiresCompatibilities": ["FARGATE"],
   "cpu": "512",
   "memory": "1024",
-  "executionRoleArn": "arn:aws:iam::369759350131:role/ecsTaskExecutionRole",
-  "taskRoleArn": "arn:aws:iam::369759350131:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::474668386320:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::474668386320:role/ecsTaskExecutionRole",
   "containerDefinitions": [
     {
-      "name": "trainbook-container",
-      "image": "369759350131.dkr.ecr.us-east-1.amazonaws.com/train-ticket-reservation:1763379368",
+      "name": "train-ticket",
+      "image": "474668386320.dkr.ecr.us-east-1.amazonaws.com/train-ticket:1763436828",
       "essential": true,
       "portMappings": [
         {
